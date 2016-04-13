@@ -1,0 +1,23 @@
+---
+  - name: Create tmp folder for installer file
+    file: path=/tmp/dcos state=directory
+  - name: Download installer from Bootstrap node
+    get_url: url=http://<bootstrap_node_ip>:<bootstrap_node_port>/dcos_install.sh dest=/tmp/dcos use_proxy=no
+  - name: Install unzip package (REQUIRED)
+    yum: name=unzip state=latest
+  - name: Create docker.service.d folder
+    file: path=/etc/systemd/system/docker.service.d state=directory
+  - name: Add override file
+    copy: src=override.conf dest=/etc/systemd/system/docker.service.d owner=root group=root mode=0600
+  - name: Reload daemons
+    command: /bin/systemctl daemon-reload
+    notify:
+      - restart docker-engine
+  - name: Add group nogroup
+    group: name=nogroup state=present
+  - name: Disable IPv6 (step 1)
+    sysctl: name=net.ipv6.conf.all.disable_ipv6 value=1 state=present reload=yes
+  - name: Disable IPv6 (step 2)
+    sysctl: name=net.ipv6.conf.default.disable_ipv6=1 value=1 state=present reload=yes
+  - name: Start installation
+    command: /usr/bin/bash /tmp/dcos/dcos_install.sh slave

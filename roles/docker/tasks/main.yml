@@ -1,0 +1,10 @@
+---
+  - name: Remove old Docker installations (if needed)
+    yum: name=docker state=removed
+  - name: Copy docker.repo inside yum.repos.d folder
+    copy: src=docker.repo dest=/etc/yum.repos.d owner=root group=root mode=0600
+  - name: Install docker-engine package
+    yum: name=docker-engine state=latest
+    ignore_errors: yes
+    notify: 
+      - restart docker-engine

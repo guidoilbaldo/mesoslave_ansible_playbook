@@ -1,0 +1,7 @@
+- name: "Install a new Mesosphere slave node"
+  hosts: test
+  sudo: yes
+  remote_user: <remote_user>
+  roles:
+  - docker
+  - mesosphere_slave 
